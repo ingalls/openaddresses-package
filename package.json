@@ -1,0 +1,23 @@
+{
+  "name": "openaddresses-package",
+  "version": "0.0.1",
+  "description": "Create package from the OpenAddresses cache",
+  "main": "index.js",
+  "keywords": [
+    "openaddresses",
+    "addresses"
+  ],
+  "bin": {
+    "openaddresses-package": "index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/openaddresses/openaddress-cache.git"
+  },
+  "author": "",
+  "license": "PD",
+  "dependencies": {
+    "progress": "~1.1.4",
+    "aws-sdk": "~2.0.0-rc11";
+  }
+}

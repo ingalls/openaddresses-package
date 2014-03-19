@@ -1,4 +1,7 @@
-openaddresses-package
-=====================
+# openaddresses-package
 
-Downloads Raw OpenAddresses Cache From s3 and Builds one Package.
+Updates the openaddresses raw package
+
+## usage
+
+    node index.js
