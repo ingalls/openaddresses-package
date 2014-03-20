@@ -4,7 +4,6 @@
 var argv = require('minimist')(process.argv.slice(2)),
     fs = require('fs'),
     ProgressBar = require('progress'),
-    crypto = require('crypto'),
     AWS = require('aws-sdk'),
     archiver = require('archiver'),
     request = require('request');
@@ -33,17 +32,16 @@ for (var i = 0; i < sources.length; i++) {
 }
 
 //Begin Downloading Sources
-downloadCache(sourceIndex);
+//downloadCache(sourceIndex);
 
 //If the cache is already downloaded and the s3 stalls, comment out downloadCache
 //And uncomment zipStream to resume the s3 upload without redownloading
-//zipStream()
-
+zipStream()
 
 function downloadCache(index) {
     if (index >= sources.length) {
         console.log("Complete!");
-        process.exit();
+        zipStream();
     }
 
     var source = sources[index];
@@ -56,12 +54,31 @@ function downloadCache(index) {
     } else {
         console.log("Downloading: " + source);
 
-
-        var stream = request(parsed.cache)
+        var stream = request(parsed.cache);
         
         showProgress(stream);
         stream.pipe(fs.createWriteStream(cacheDir + source.replace(".json", ".zip")));
     }
+}
+
+function showProgress(stream) {
+    var bar;
+    
+    stream.on('response', function(res) {
+        var len = parseInt(res.headers['content-length'], 10);
+        bar = new ProgressBar('  downloading [:bar] :percent :etas', {
+            complete: '=',
+            incomplete: '-',
+            width: 20,
+            total: len
+        });
+    });
+    stream.on('data', function(chunk) {
+        if (bar) bar.tick(chunk.length);
+    }).on('end', function() {
+        if (bar) console.log('\n');
+        downloadCache(++cacheIndex);
+    });
 }
 
 function zipStream() {
@@ -77,7 +94,7 @@ function zipStream() {
         upload();
     });
 
-    cache.forEach(function(item){
+    cache.forEach(function(item) {
         console.log("Zipping: " + item);
         var file = cacheDir + item;
         archive.append(fs.createReadStream(file), { name: item });
