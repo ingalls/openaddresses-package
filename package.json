@@ -17,7 +17,9 @@
   "author": "",
   "license": "PD",
   "dependencies": {
-    "progress": "~1.1.4",
-    "aws-sdk": "~2.0.0-rc11";
+    "aws-sdk": "~2.0.0-rc11",
+    "minimist": "0.0.8",
+    "request": "~2.34.0",
+    "archiver": "~0.6.1"
   }
 }
