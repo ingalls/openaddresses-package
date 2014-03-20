@@ -8,6 +8,6 @@ Updates the openaddresses raw package
 
 Where
 
-<sources> is the path to the openaddresses manifest
+`<sources>` is the path to the openaddresses manifest
 
-<working-directory> is an *empty* directory for processing
+`<working-directory>` is an *empty* directory for processing
