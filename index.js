@@ -7,6 +7,7 @@ var argv = require('minimist')(process.argv.slice(2)),
     AWS = require('aws-sdk'),
     archiver = require('archiver'),
     request = require('request');
+    
 
 //Command Line Args
 var sourceDir = argv._[0],
@@ -32,11 +33,12 @@ for (var i = 0; i < sources.length; i++) {
 }
 
 //Begin Downloading Sources
-//downloadCache(sourceIndex);
+downloadCache(sourceIndex);
 
 //If the cache is already downloaded and the s3 stalls, comment out downloadCache
 //And uncomment zipStream to resume the s3 upload without redownloading
-zipStream()
+//zipStream();
+//uploadPackage();
 
 function downloadCache(index) {
     if (index >= sources.length) {
@@ -76,7 +78,6 @@ function showProgress(stream) {
     stream.on('data', function(chunk) {
         if (bar) bar.tick(chunk.length);
     }).on('end', function() {
-        if (bar) console.log('\n');
         downloadCache(++cacheIndex);
     });
 }
@@ -91,41 +92,47 @@ function zipStream() {
 
     output.on('close', function() {
         console.log("Zipping Complete");
-        upload();
+        uploadPackage();
     });
 
     cache.forEach(function(item) {
-        console.log("Zipping: " + item);
+        console.log("Zipping Zips: " + item);
         var file = cacheDir + item;
         archive.append(fs.createReadStream(file), { name: item });
+    });
+
+    sources.forEach(function(manifest) {
+        console.log("Zipping Manifest: " + manifest);
+        var file = sourceDir + manifest;
+        archive.append(fs.createReadStream(file), { name: manifest });
     });
 
     console.log("Finalizing Zipping");
     archive.finalize();
 }
 
-function upload() {
-    
-    console.log("  Updating s3 with Package");
-    
-    var s3 = new AWS.S3();
-    fs.readFile(cacheDir + "openaddresses.zip" , function (err, data) {
-        if (err)
-            throw new Error('Could not find data to upload'); 
-        
-        var buffer = new Buffer(data, 'binary');
+function uploadPackage() {
+    console.log("Uploading to s3");
+    var Uploader = require('s3-streaming-upload').Uploader,
+        upload = null,
+        stream = fs.createReadStream(cacheDir + "openaddresses.zip");
 
-        var s3 = new AWS.S3();
-        
-        s3.client.putObject({
-            Bucket: 'openaddresses',
-            Key: 'openaddresses.zip',
-            Body: buffer,
+    upload = new Uploader({
+        accessKey:  process.env.AWS_ACCESS_KEY_ID,
+        secretKey:  process.env.AWS_SECRET_ACCESS_KEY,
+        bucket:     "openaddresses",
+        objectName: "openaddresses.zip",
+        stream:     stream,
+        objectParams: {
             ACL: 'public-read'
-        }, function (response) {
-            console.log('  Successfully uploaded package.');
-            updateManifest();
-            process.exit(0);
-        });
+        }
+    });
+
+    upload.on('completed', function (err, res) {
+        console.log('upload completed');
+    });
+
+    upload.on('failed', function (err) {
+        console.log('upload failed with error', err);
     });
 }

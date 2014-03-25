@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/openaddresses/openaddress-cache.git"
+    "url": "https://github.com/openaddresses/openaddress-package.git"
   },
   "author": "",
   "license": "PD",
@@ -20,6 +20,9 @@
     "aws-sdk": "~2.0.0-rc11",
     "minimist": "0.0.8",
     "request": "~2.34.0",
-    "archiver": "~0.6.1"
+    "archiver": "~0.6.1",
+    "s3-streaming-upload": "~0.1.9",
+    "knox": "~0.8.9",
+    "knox-mpu": "~0.1.6"
   }
 }
