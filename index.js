@@ -40,46 +40,50 @@ downloadCache(sourceIndex);
 //zipStream();
 //uploadPackage();
 
+//TODO
+//clean();
+
 function downloadCache(index) {
     if (index >= sources.length) {
         console.log("Complete!");
         zipStream();
-    }
-
-    var source = sources[index];
-    
-    parsed = JSON.parse(fs.readFileSync(sourceDir + source, 'utf8'));
-
-    if (!parsed.cache || parsed.skip === true){
-        console.log("Skipping: " + source);
-        downloadCache(++sourceIndex);
     } else {
-        console.log("Downloading: " + source);
 
-        var stream = request(parsed.cache);
+        var source = sources[index];
         
-        showProgress(stream);
-        stream.pipe(fs.createWriteStream(cacheDir + source.replace(".json", ".zip")));
-    }
-}
+        parsed = JSON.parse(fs.readFileSync(sourceDir + source, 'utf8'));
 
-function showProgress(stream) {
-    var bar;
-    
-    stream.on('response', function(res) {
-        var len = parseInt(res.headers['content-length'], 10);
-        bar = new ProgressBar('  downloading [:bar] :percent :etas', {
-            complete: '=',
-            incomplete: '-',
-            width: 20,
-            total: len
+        if (!parsed.cache || parsed.skip === true){
+            console.log("Skipping: " + source);
+            downloadCache(++sourceIndex);
+        } else {
+            console.log("Downloading: " + source);
+
+            var stream = request(parsed.cache);
+            
+            showProgress(stream);
+            stream.pipe(fs.createWriteStream(cacheDir + source.replace(".json", ".zip")));
+        }
+    }
+
+    function showProgress(stream) {
+        var bar;
+        
+        stream.on('response', function(res) {
+            var len = parseInt(res.headers['content-length'], 10);
+            bar = new ProgressBar('  downloading [:bar] :percent :etas', {
+                complete: '=',
+                incomplete: '-',
+                width: 20,
+                total: len
+            });
         });
-    });
-    stream.on('data', function(chunk) {
-        if (bar) bar.tick(chunk.length);
-    }).on('end', function() {
-        downloadCache(++cacheIndex);
-    });
+        stream.on('data', function(chunk) {
+            if (bar) bar.tick(chunk.length);
+        }).on('end', function() {
+            downloadCache(++cacheIndex);
+        });
+    }
 }
 
 function zipStream() {
@@ -136,3 +140,35 @@ function uploadPackage() {
         console.log('upload failed with error', err);
     });
 }
+
+function clean() {
+    console.log("Removing Orphaned S3 Packages");
+
+    var s3 = new AWS.S3();
+    var params = {
+        Bucket: "openaddresses"
+    }
+
+    s3.listObjects(params, function(err, data) {
+        for (var i = 0; i < data.Contents.length; i++) {
+            if (!checkSource(data.Contents[i].Key)) {
+                console.log("  Removing Orphaned package");
+                process.exit(0);
+            }
+        }  
+    });
+}
+
+function checkSource(s3Key) {
+    var found = false;
+    
+    for (var e = 0; e < sources.length; e++) {
+        parsed = JSON.parse(fs.readFileSync(sourceDir + source, 'utf8'));
+        local = parsed.cache.replace("http://s3.amazonaws.com/openaddresses/","");
+
+        if (s3Key == local)
+            found = true;
+    }    
+    return found;
+}
+
