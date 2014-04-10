@@ -104,7 +104,7 @@ function uploadPackage() {
         accessKey:  process.env.AWS_ACCESS_KEY_ID,
         secretKey:  process.env.AWS_SECRET_ACCESS_KEY,
         bucket:     "openaddresses",
-        objectName: "openaddresses-conform.zip",
+        objectName: "openaddresses-processed.zip",
         stream:     stream,
         objectParams: {
             ACL: 'public-read'
