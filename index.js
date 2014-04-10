@@ -14,6 +14,12 @@ if (!type || !sourceDir || !cacheDir) {
     throw new Error('usage: openaddresses-package <type> <path-to-sources> <working-directory>');
 }
 
+if (cacheDir.substr(cacheDir.length-1) != "/")
+    cacheDir = cacheDir + "/";
+
+if (sourceDir.substr(sourceDir.length-1) != "/")
+    sourceDir = sourceDir + "/";
+
 //Setup list of sources
 var sources = fs.readdirSync(sourceDir);
 
