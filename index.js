@@ -3,7 +3,7 @@
 //NPM Dependancies
 var argv = require('minimist')(process.argv.slice(2)),
     fs = require('fs');
-    
+
 //Command Line Args
 var type = argv._[0],
     sourceDir = argv._[1],
@@ -11,7 +11,7 @@ var type = argv._[0],
 
 //Check Arguments
 if (!type || !sourceDir || !cacheDir) {
-    throw new Error('usage: openaddresses-package <type> <path-to-sources> <working-directory>');
+    throw new Error('usage: openaddresses-package <raw|conform> <path-to-sources> <working-directory>');
 }
 
 if (cacheDir.substr(cacheDir.length-1) != "/")

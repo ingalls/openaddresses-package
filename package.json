@@ -23,6 +23,7 @@
     "archiver": "~0.6.1",
     "s3-streaming-upload": "~0.1.9",
     "knox": "~0.8.9",
-    "knox-mpu": "~0.1.6"
+    "knox-mpu": "~0.1.6",
+    "progress": "^1.1.5"
   }
 }
